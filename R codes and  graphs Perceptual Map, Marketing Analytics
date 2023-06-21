@@ -1,0 +1,75 @@
+# load the data
+Brand.ratings <- Brand_Percep
+
+# center and Z-score it
+
+# example
+x <- 1:1000
+x.sc <- (x - mean(x)) / sd(x)
+summary(x.sc)
+
+# transform the Brand data
+Brand.sc <- Brand.ratings
+Brand.sc[, 1:9] <- data.frame(scale(Brand.ratings[, 1:9]))
+summary(Brand.sc)
+
+library(corrplot)
+
+corrplot(cor(Brand.sc[, 1:9]), order="hclust")
+
+
+# aggregate personality attributes by Brand
+Brand.mean <- aggregate(. ~ Brand, data=Brand.sc, mean)
+Brand.mean
+
+rownames(Brand.mean) <- Brand.mean[, 1] 
+Brand.mean <- Brand.mean[, -1]          
+Brand.mean
+
+
+#### basic visualization 
+
+# heatmap of attribute by Brand
+library(gplots)
+library(RColorBrewer)
+heatmap.2(as.matrix(Brand.mean), 
+          col=brewer.pal(9, "GnBu"), trace="none", key=FALSE, dend="none",
+          main="\n\n\n\n\nBrand attributes")
+
+
+Brand.mean
+Brand.mu.pc <- prcomp(Brand.mean, scale=TRUE)
+summary(Brand.mu.pc)
+
+biplot(Brand.mu.pc, main="Brand positioning", cex=c(1, 0.8))
+
+
+# compare Brands
+Brand.mean["Papa", ] - Brand.mean["Tango", ]
+
+colMeans(Brand.mean[c("Sierra", "Romeo", "Tango"), ]) - Brand.mean["Papa", ]
+
+
+#### Multidimensional scaling
+# distance matrix
+Brand.dist <- dist(Brand.mean)
+
+# metric MDS
+(Brand.mds <- cmdscale(Brand.dist))
+# plot it
+plot(Brand.mds, type="n")
+text(Brand.mds, rownames(Brand.mds), cex=1)
+
+
+# non-metric MDS alternative 
+Brand.rank <- data.frame(lapply(Brand.mean, function(x) ordered(rank(x))))
+str(Brand.rank)
+
+library(cluster)
+library(MASS)
+Brand.dist.r <- daisy(Brand.rank, metric="gower")
+
+Brand.mds.r <- isoMDS(Brand.dist.r)
+
+plot(Brand.mds.r$points, type="n")
+text(Brand.mds.r$points, levels(Brand.sc$Brand), cex=1)
