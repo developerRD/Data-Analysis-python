@@ -1,3 +1,4 @@
+#Data is here in this repository named Brand_Percep
 # load the data
 Brand.ratings <- Brand_Percep
 
