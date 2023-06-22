@@ -1,0 +1,60 @@
+install.packages("conjoint")
+library(conjoint)
+
+data(tea)
+ls()
+print(tprefm)
+print(tpref)
+print(tprof)
+print(tlevn)
+print(tsimp)
+
+#declaring the research variables 
+tea<-expand.grid(Price=c("low","medium","high"),
+                        Variety=c("black","green","red"), 
+                        kind=c("bags","granulated","leafy"),
+                        aroma=c("yes","no"))
+
+#determining the dsign
+factdesign<-caFactorialDesign(data=tea,type="fractional")
+print(factdesign)
+
+#encoding variable levels of the design
+prof=caEncodedDesign(design=factdesign)
+print(prof)
+
+print(round(cov(prof),5))
+print(round(cor(prof),5))
+print(det(cor(prof)))
+
+
+#model estimation for an aggregate level
+partutilities=caPartUtilities(y=tpref,x=tprof,z=tlevn)
+print(partutilities)
+totalutilities=caTotalUtilities(y=tpref,x=tprof)
+print(totalutilities)
+
+#summary of the most important preference measurement results 
+Conjoint(y=tpref,x=tprof,z=tlevn)
+
+#segmentation using k-means clustering 
+segments<-caSegmentation(tpref,tprof)
+print(segments$segm)
+segments2<-caSegmentation(tpref,tprof,c=3)
+print(segments2$segm)
+
+#visualization of the three clusters 
+summary(segments2)
+
+require(fpc)
+plotcluster(segments2$util,segments2$sclu)
+str(segments2)
+
+require(broom)
+require(ggplot2)
+dcf<-discrcoord(segments2$util,segments2$sclu)
+assignments<-augment(segments2$segm,dcf$proj[,1:2])
+ggplot(assignments)+geom_point(aes(x=X1,y=X2,color= .cluster))+labs(color="Cluster Assignment",title="K-Means Clustering Results")
+
+#market share analysis
+ShowAllSimulations(sym=tsimp,y=tpref,x=tprof)
