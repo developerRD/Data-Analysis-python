@@ -47,6 +47,8 @@ plot(ols_step_all_possible(model))
 ols_step_best_subset(model)
 plot(ols_step_best_subset(model))
 
+# We tried 3 models, stepwise forward, backward, and just stepwise model and then we decided which model we should choose based on the results.
+
 #stepwise forward 
 model2<-lm(likePur~., data = regression)
 ols_step_forward_p(model2)
@@ -60,12 +62,12 @@ plot(ols_step_backward_p(model3))
 ols_step_backward_p(model3, details = TRUE)
 
 #### Answer 
-# Based on the anova, regression, and AIC results, Stepwise Backward model is a better fit.
+# Based on the ANOVA, regression, and AIC results, the Stepwise Backward model is a better fit.
 #In the parameter estimates table, significant coefficients have associated p-values less than the chosen significance level.
 #The coefficient for "pq" is 0.254 with a standard error of 0.040. It is significant because p < 0.05 and positively related to the variable "likePur."
 #An increase in "pq" is associated with an increase in customer liking of the product purchase.
 #The coefficient for "sizesmall" is -0.531. It is also  significant and negatively related to "likePur." 
-#This means that customers from smaller-sized regions tend to have lower liking of the product purchase compared to customers from larger-sized regions.
+#This means that customers from smaller-sized regions tend to have a lower liking of the product purchase compared to customers from larger-sized regions.
 
 #stepwise 
 model4<-lm(likePur~., data = regression)
