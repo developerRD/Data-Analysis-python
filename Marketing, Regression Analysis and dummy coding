@@ -1,0 +1,100 @@
+
+ls(regression)
+cate<-regression
+
+#dummy coding1
+cate$large<-ifelse(cate$size=='large',1,0)
+str(cate)
+cate
+
+#dummy coding2
+install.packages("fastDummies")
+library(fastDummies)
+cate1<-dummy_cols(cate,select_columns = "size")
+str(cate1)
+cate1
+summary(cate1)
+
+library(dplyr)
+cate1 = select(cate1, -9, -11)
+cate1
+
+#practice
+cate<-dummy_cols(cate,select_columns = c("size", "type"))
+str(cate)
+cate = select(cate, -1,-2,-9,-11,-13)
+str(cate)
+
+model<-lm(likePur~., data=cate)
+summary(model)
+## The coefficients estimate the effect of each independent variable on the dependent variable 'likePur'.
+#The 'Intercept' represents the expected value of 'likePur' and it is statistically significant (p-value < 0.001)
+#The coefficients for 'pq', 'ecommer', 'techsupp', 'comPricing', 'delivery', and 'large' are significant but at different levels (p-values < 0.05).
+#The coefficients for 'complaint', 'advert', 'productline', 'newpro', 'size_large', and 'size_small' are not  significant (p-values > 0.05). 
+#The multiple R-squared value is 0.4808. That means that the independent variables can  explain 48.08% of the variance in the dependent variable.
+
+
+
+install.packages("olsrr")
+library(olsrr)
+library(MASS)
+ls(regression)
+
+model <- lm(likePur~ comPricing + delivery + ob + pq + complaint+ ecommer+techsupp+advert+productline+salesforce+warranty+newpro, data = regression)
+ols_step_all_possible(model)
+plot(ols_step_all_possible(model))
+
+ols_step_best_subset(model)
+plot(ols_step_best_subset(model))
+
+#stepwise forward 
+model2<-lm(likePur~., data = regression)
+ols_step_forward_p(model2)
+plot(ols_step_forward_p(model2))
+ols_step_forward_p(model2, details = TRUE)
+
+######stepwise backward###### ( this model is selected )
+model3<-lm(likePur~., data = regression)
+ols_step_backward_p(model3)
+plot(ols_step_backward_p(model3))
+ols_step_backward_p(model3, details = TRUE)
+
+#### Answer 
+# Based on the anova, regression, and AIC results, Stepwise Backward model is a better fit.
+#In the parameter estimates table, significant coefficients have associated p-values less than the chosen significance level.
+#The coefficient for "pq" is 0.254 with a standard error of 0.040. It is significant because p < 0.05 and positively related to the variable "likePur."
+#An increase in "pq" is associated with an increase in customer liking of the product purchase.
+#The coefficient for "sizesmall" is -0.531. It is also  significant and negatively related to "likePur." 
+#This means that customers from smaller-sized regions tend to have lower liking of the product purchase compared to customers from larger-sized regions.
+
+#stepwise 
+model4<-lm(likePur~., data = regression)
+ols_step_both_p(model4)
+plot(ols_step_both_p(model4))
+ols_step_both_p(model4, details = TRUE)
+
+#regression 
+summary(model)
+
+#normality
+residuals<-model$residuals
+hist(residuals)
+qqnorm(residuals)
+qqline(residuals)
+
+#2VIF
+install.packages("car")
+library(car)
+vif(model)
+
+#outlierness
+#1influential points 
+plot(cooks.distance(model),pch=16,col="blue")
+#2leverage points 
+hats<-as.data.frame(hatvalues(model))
+hats
+plot(hatvalues(model),type = 'h')
+#3outlier test
+outlierTest(model)
+
+
